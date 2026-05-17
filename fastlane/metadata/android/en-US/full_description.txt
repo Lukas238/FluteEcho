@@ -1,0 +1,11 @@
+FluteEcho is a microphone passthrough app with echo/delay and automatic feedback suppression, designed for transverse flute practice.
+
+Connect your phone to a Bluetooth speaker, open the app, and play — the app monitors the audio in real time, detects feedback frequencies and applies notch filters automatically.
+
+Features:
+• Mic passthrough with adjustable echo and delay
+• Room and Cathedral presets
+• Real-time spectrum analyzer (flute range highlighted)
+• Auto feedback suppression (up to 18 kHz)
+• Frequency log with feedback markers
+• No internet required, no tracking, no ads
