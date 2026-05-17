@@ -1,937 +1,652 @@
 <!doctype html>
-<html lang="es">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Mic + Eco</title>
+  <title>FluteEcho</title>
   <style>
     :root {
-      --bg:     #0b0f17;
-      --panel:  #0f172a;
-      --text:   #e5e7eb;
-      --muted:  #94a3b8;
-      --border: rgba(255,255,255,.10);
-      --ok:     #22c55e;
-      --danger: #ef4444;
-      --accent: #3b82f6;
-      --warn:   #f59e0b;
-      --shadow: 0 12px 32px rgba(0,0,0,.45);
+      --bg:#0b0f17;--panel:#0f172a;--card-bg:rgba(15,23,42,.65);--text:#e5e7eb;
+      --muted:#94a3b8;--border:rgba(255,255,255,.10);--ok:#22c55e;--danger:#ef4444;
+      --accent:#3b82f6;--warn:#f59e0b;--shadow:0 12px 32px rgba(0,0,0,.45);
+      --canvas-bg:#090e1a;--grad1:rgba(96,165,250,.20);--grad2:rgba(34,197,94,.14);
+      --seg-active-bg:rgba(59,130,246,.18);--seg-active-border:rgba(59,130,246,.5);--seg-active-text:#93c5fd;
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(1200px 700px at 50% -20%, rgba(96,165,250,.20), transparent 55%),
-        radial-gradient(900px 500px at 20% 120%,  rgba(34,197,94,.14),  transparent 55%),
-        var(--bg);
-      min-height: 100dvh;
-      overflow-x: hidden;
+    [data-theme="light"] {
+      --bg:#f1f5f9;--panel:#e2e8f0;--card-bg:rgba(255,255,255,.82);--text:#1e293b;
+      --muted:#64748b;--border:rgba(0,0,0,.12);--shadow:0 8px 24px rgba(0,0,0,.12);
+      --canvas-bg:#dde4ef;--grad1:rgba(59,130,246,.08);--grad2:rgba(34,197,94,.06);
+      --seg-active-bg:rgba(59,130,246,.12);--seg-active-border:rgba(59,130,246,.5);--seg-active-text:#1d4ed8;
     }
-
-    /* ── WRAP ── */
-    .wrap {
-      min-height: 100dvh;
-      padding: 12px 14px calc(16px + env(safe-area-inset-bottom));
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-width: 480px;
-      margin: 0 auto;
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:radial-gradient(1200px 700px at 50% -20%,var(--grad1),transparent 55%),
+                 radial-gradient(900px 500px at 20% 120%,var(--grad2),transparent 55%),var(--bg);
+      min-height:100dvh;overflow-x:hidden;
     }
-
-    /* ── BADGES ── */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 11px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-      flex-shrink: 0;
+    .wrap{
+      min-height:100dvh;
+      padding:max(20px,env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom));
+      display:flex;flex-direction:column;gap:10px;max-width:480px;margin:0 auto;
     }
-    .badge.warn  { border-color: rgba(245,158,11,.4); color: #fcd34d; }
-    .badge.ok    { border-color: rgba(34,197,94,.35);  color: #86efac; }
-
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      background: rgba(148,163,184,.45);
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;
+      background:rgba(255,255,255,.06);border:1px solid var(--border);
+      color:var(--muted);font-size:12px;white-space:nowrap;flex-shrink:0;
     }
-    .dot.live { background: var(--ok);    box-shadow: 0 0 0 3px rgba(34,197,94,.2); }
-    .dot.bt   { background: var(--accent);box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
-    .dot.warn { background: var(--warn);  box-shadow: 0 0 0 3px rgba(245,158,11,.2); }
-
-    /* ── TOP ROW ── */
-    .toprow { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .spacer  { flex: 1; }
-
-    /* ── MIC BUTTON ── */
-    .micBtn {
-      width: 100%;
-      height: 86px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
-      box-shadow: var(--shadow);
-      display: flex; align-items: center; justify-content: center;
-      gap: 14px;
-      color: var(--text); font-size: 15px; font-weight: 600;
-      cursor: pointer; touch-action: manipulation;
-      transition: border-color .15s, background .15s;
-      flex-shrink: 0;
+    [data-theme="light"] .badge{background:rgba(0,0,0,.04);}
+    .badge.ok{border-color:rgba(34,197,94,.35);color:#15803d;}
+    .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:rgba(148,163,184,.45);}
+    .dot.live{background:var(--ok);box-shadow:0 0 0 3px rgba(34,197,94,.2);}
+    .toprow{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .spacer{flex:1;}
+    .icon-btn{
+      width:36px;height:36px;border-radius:10px;border:1px solid var(--border);
+      background:rgba(255,255,255,.06);color:var(--muted);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;touch-action:manipulation;flex-shrink:0;
     }
-    .micBtn:active { transform: translateY(1px); }
-    .micBtn.on {
-      border-color: rgba(34,197,94,.42);
-      background: linear-gradient(180deg, rgba(34,197,94,.17), rgba(34,197,94,.04));
+    [data-theme="light"] .icon-btn{background:rgba(0,0,0,.04);}
+    .icon-btn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;}
+    .icon-btn:active{transform:translateY(1px);}
+    .micBtn{
+      width:100%;height:86px;border-radius:20px;border:1px solid var(--border);
+      background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));
+      box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;gap:14px;
+      color:var(--text);font-size:15px;font-weight:600;cursor:pointer;touch-action:manipulation;
+      transition:border-color .15s,background .15s;flex-shrink:0;
     }
-    .micIcon { width: 34px; height: 34px; flex-shrink: 0; }
-
-    /* ── CTRL ROW ── */
-    .ctrl-row { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-
-    /* Level chip — FIXED WIDTH prevents layout shift */
-    .level-chip {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid var(--border);
-      color: var(--muted); font-size: 12px;
-      width: 84px;
-      flex-shrink: 0;
+    [data-theme="light"] .micBtn{background:rgba(255,255,255,.85);}
+    .micBtn:active{transform:translateY(1px);}
+    .micBtn.on{border-color:rgba(34,197,94,.42);background:linear-gradient(180deg,rgba(34,197,94,.17),rgba(34,197,94,.04));}
+    .micIcon{width:34px;height:34px;flex-shrink:0;}
+    .ctrl-row{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .segmented{display:flex;border-radius:12px;border:1px solid var(--border);overflow:hidden;flex-shrink:0;}
+    .seg-btn{
+      padding:8px 16px;border:none;background:rgba(255,255,255,.04);
+      color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;touch-action:manipulation;
+      transition:background .12s,color .12s;white-space:nowrap;
     }
-    .level-val {
-      font-variant-numeric: tabular-nums;
-      font-size: 12px;
-      width: 2.5ch;
-      text-align: right;
+    [data-theme="light"] .seg-btn{background:rgba(0,0,0,.03);}
+    .seg-btn:not(:last-child){border-right:1px solid var(--border);}
+    .seg-btn.active{background:var(--seg-active-bg);color:var(--seg-active-text);}
+    .seg-btn:active{opacity:.8;}
+    .reset-btn{
+      display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;
+      border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);color:#fca5a5;
+      font-size:12px;font-weight:500;cursor:pointer;touch-action:manipulation;flex-shrink:0;white-space:nowrap;
     }
-
-    .btn {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; cursor: pointer; touch-action: manipulation;
+    [data-theme="light"] .reset-btn{color:#dc2626;background:rgba(239,68,68,.06);}
+    .reset-btn svg{width:14px;height:14px;}
+    .reset-btn:active{transform:translateY(1px);}
+    .card{
+      background:var(--card-bg);border:1px solid var(--border);border-radius:18px;
+      padding:12px 14px;box-shadow:0 8px 22px rgba(0,0,0,.22);flex-shrink:0;
     }
-    .btn svg { width: 18px; height: 18px; }
-    .btn:active { transform: translateY(1px); }
-    .btn.active { border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.15); color: #93c5fd; }
-    .btn.danger { border-color: rgba(239,68,68,.35);  background: rgba(239,68,68,.08); }
-
-    /* ── CARDS ── */
-    .card {
-      background: rgba(15,23,42,.65);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 12px 14px;
-      box-shadow: 0 8px 22px rgba(0,0,0,.22);
-      flex-shrink: 0;
+    .card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;}
+    .vu-wrap{height:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;border:1px solid rgba(255,255,255,.07);margin-bottom:10px;}
+    [data-theme="light"] .vu-wrap{background:rgba(0,0,0,.08);border-color:rgba(0,0,0,.07);}
+    .vu-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),#86efac);transition:width .06s linear;}
+    .vu-bar.clip{background:linear-gradient(90deg,#ef4444,#fca5a5);}
+    .row{display:grid;grid-template-columns:66px 1fr 54px;gap:8px;align-items:center;margin-bottom:8px;}
+    .row:last-of-type{margin-bottom:0;}
+    .label{font-size:12px;color:var(--muted);}
+    .val{font-size:12px;font-variant-numeric:tabular-nums;text-align:right;color:var(--text);}
+    input[type="range"]{width:100%;accent-color:var(--accent);}
+    .preset-hint{margin-top:8px;font-size:11px;color:var(--muted);line-height:1.4;}
+    .spectrum-wrap{position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.07);margin-bottom:10px;}
+    #specCanvas{display:block;width:100%;height:160px;background:var(--canvas-bg);}
+    .spec-tap-hint{position:absolute;right:6px;bottom:4px;font-size:9px;color:rgba(148,163,184,.4);pointer-events:none;}
+    .anti-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+    .anti-label{font-size:12px;color:var(--muted);flex:1;}
+    .toggle-btn{
+      padding:5px 12px;border-radius:999px;border:1px solid var(--border);
+      background:rgba(255,255,255,.06);color:var(--muted);font-size:12px;
+      cursor:pointer;touch-action:manipulation;white-space:nowrap;
     }
-    .card-title {
-      font-size: 11px; font-weight: 600;
-      text-transform: uppercase; letter-spacing: .06em;
-      color: var(--muted); margin-bottom: 10px;
+    [data-theme="light"] .toggle-btn{background:rgba(0,0,0,.04);}
+    .toggle-btn.on{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.15);color:#93c5fd;}
+    [data-theme="light"] .toggle-btn.on{color:#1d4ed8;background:rgba(59,130,246,.10);}
+    .notches-wrap{display:flex;flex-wrap:wrap;gap:6px;min-height:22px;}
+    .notch-chip{
+      display:inline-flex;align-items:center;gap:5px;padding:4px 8px 4px 10px;border-radius:999px;font-size:11px;
+      border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:#fca5a5;
     }
-
-    /* VU meter */
-    .vu-wrap {
-      height: 7px; border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      overflow: hidden; border: 1px solid rgba(255,255,255,.07);
-      margin-bottom: 10px;
-    }
-    .vu-bar {
-      height: 100%; width: 0%;
-      background: linear-gradient(90deg, var(--ok), #86efac);
-      transition: width .06s linear;
-    }
-    .vu-bar.clip { background: linear-gradient(90deg, #ef4444, #fca5a5); }
-
-    /* Sliders */
-    .row {
-      display: grid; grid-template-columns: 66px 1fr 54px;
-      gap: 8px; align-items: center; margin-bottom: 8px;
-    }
-    .row:last-of-type { margin-bottom: 0; }
-    .label { font-size: 12px; color: var(--muted); }
-    .val   { font-size: 12px; font-variant-numeric: tabular-nums; text-align: right; color: var(--text); }
-    input[type="range"] { width: 100%; accent-color: var(--accent); }
-
-    .preset-hint { margin-top: 8px; font-size: 11px; color: var(--muted); line-height: 1.4; }
-
-    /* ── SPECTRUM CANVAS ── */
-    .spectrum-wrap {
-      position: relative; border-radius: 10px; overflow: hidden;
-      border: 1px solid rgba(255,255,255,.07); margin-bottom: 10px;
-    }
-    #specCanvas { display: block; width: 100%; height: 72px; background: #090e1a; }
-    .spec-tap-hint {
-      position: absolute; right: 6px; bottom: 4px;
-      font-size: 9px; color: rgba(148,163,184,.4); pointer-events: none;
-    }
-
-    /* Auto feedback row */
-    .anti-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .anti-label { font-size: 12px; color: var(--muted); flex: 1; }
-
-    .toggle-btn {
-      padding: 5px 12px; border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color: var(--muted); font-size: 12px;
-      cursor: pointer; touch-action: manipulation; white-space: nowrap;
-    }
-    .toggle-btn.on { border-color: rgba(59,130,246,.5); background: rgba(59,130,246,.15); color: #93c5fd; }
-
-    /* Notch chips */
-    .notches-wrap { display: flex; flex-wrap: wrap; gap: 6px; min-height: 22px; }
-    .notch-chip {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 4px 8px 4px 10px; border-radius: 999px; font-size: 11px;
-      border: 1px solid rgba(239,68,68,.4); background: rgba(239,68,68,.1); color: #fca5a5;
-    }
-    .notch-chip.auto { border-color: rgba(245,158,11,.4); background: rgba(245,158,11,.08); color: #fde68a; }
-    .notch-chip button {
-      background: none; border: none; color: inherit;
-      font-size: 14px; line-height: 1; padding: 0 1px;
-      cursor: pointer; opacity: .7;
-    }
-    .notch-chip button:active { opacity: 1; }
-    .empty-hint { font-size: 11px; color: rgba(148,163,184,.35); font-style: italic; }
-
-    /* ── STATUS BAR ── */
-    .status-bar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .status-text {
-      font-size: 12px; color: var(--muted); flex: 1;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
+    .notch-chip.auto{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#fde68a;}
+    .notch-chip button{background:none;border:none;color:inherit;font-size:14px;line-height:1;padding:0 1px;cursor:pointer;opacity:.7;}
+    .notch-chip button:active{opacity:1;}
+    .empty-hint{font-size:11px;color:rgba(148,163,184,.35);font-style:italic;}
+    .log-header{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+    .log-header .card-title{margin-bottom:0;flex:1;min-width:80px;}
+    #logBody{font-size:10px;color:var(--muted);overflow:visible;white-space:pre;font-family:monospace;margin:0;line-height:1.6;min-height:64px;}
   </style>
 </head>
-
 <body>
 <div class="wrap">
-
-  <!-- TOP ROW -->
   <div class="toprow">
     <div class="badge" id="liveBadge">
       <span class="dot" id="liveDot"></span>
       <span id="liveText">Offline</span>
     </div>
-    <div class="badge" id="btBadge">
-      <span class="dot" id="btDot"></span>
-      <span id="btText">BT?</span>
-    </div>
     <div class="spacer"></div>
-    <div class="badge" id="presetBadge">
-      <span id="presetLabel" style="color:var(--text)">Sala</span>
-    </div>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
   </div>
-
-  <!-- MIC BUTTON -->
-  <button class="micBtn" id="micBtn" aria-label="Micrófono on/off">
+  <button class="micBtn" id="micBtn">
     <svg class="micIcon" viewBox="0 0 24 24" fill="none">
       <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       <path d="M19 11a7 7 0 0 1-14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       <path d="M12 18v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       <path d="M8 21h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
     </svg>
-    <span id="micBtnLabel">Iniciar</span>
+    <span id="micBtnLabel">Start</span>
   </button>
-
-  <!-- CONTROLS ROW -->
   <div class="ctrl-row">
-    <div class="level-chip">
-      <span class="label">Niv</span>
-      <span class="level-val" id="levelText">—</span>
-    </div>
     <div class="spacer"></div>
-    <button class="btn" id="presetBtn" title="Cambiar preset" aria-label="Preset">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M3 12h3M18 12h3M12 3v3M12 18v3"/>
-      </svg>
-    </button>
-    <button class="btn danger" id="resetBtn" title="Reset" aria-label="Reset">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-        <path d="M3 3v5h5"/>
-      </svg>
+    <div class="segmented">
+      <button class="seg-btn active" data-key="sala" id="presetSala">Room</button>
+      <button class="seg-btn" data-key="catedral" id="presetCatedral">Cathedral</button>
+    </div>
+    <button class="reset-btn" id="resetBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      <span id="resetLabel">Reset</span>
     </button>
   </div>
-
-  <!-- CONTROLS CARD -->
   <div class="card">
-    <div class="card-title">Controles</div>
+    <div class="card-title" id="titleControls">Controls</div>
     <div class="vu-wrap"><div id="vuBar" class="vu-bar"></div></div>
     <div class="row">
-      <label class="label" for="volGain">Volumen</label>
-      <input id="volGain" type="range" min="1" max="8" step="0.1" value="3.5" />
+      <label class="label" for="volGain" id="labelVolume">Volume</label>
+      <input id="volGain" type="range" min="1" max="8" step="0.1" value="3.5"/>
       <div class="val" id="volGainVal">3.5×</div>
     </div>
     <div class="row">
-      <label class="label" for="echoAmt">Eco</label>
-      <input id="echoAmt" type="range" min="0" max="1" step="0.01" value="0.25" />
+      <label class="label" for="echoAmt" id="labelEcho">Echo</label>
+      <input id="echoAmt" type="range" min="0" max="1" step="0.01" value="0.25"/>
       <div class="val" id="echoAmtVal">25%</div>
     </div>
     <div class="row">
-      <label class="label" for="delayMs">Delay</label>
-      <input id="delayMs" type="range" min="50" max="600" step="5" value="180" />
+      <label class="label" for="delayMs" id="labelDelay">Delay</label>
+      <input id="delayMs" type="range" min="50" max="600" step="5" value="180"/>
       <div class="val" id="delayMsVal">180ms</div>
     </div>
-    <div class="preset-hint" id="presetHint">Sala: eco corto, natural (ideal para práctica).</div>
+    <div class="preset-hint" id="presetHint"></div>
   </div>
-
-  <!-- ANTI-FEEDBACK CARD -->
   <div class="card">
-    <div class="card-title">Anti-Acople</div>
+    <div class="card-title" id="titleAntiFb">Anti-Feedback</div>
     <div class="spectrum-wrap">
-      <canvas id="specCanvas" aria-label="Analizador de frecuencias"></canvas>
-      <span class="spec-tap-hint">toca para filtrar</span>
+      <canvas id="specCanvas"></canvas>
+      <span class="spec-tap-hint" id="tapHint">tap to add filter</span>
     </div>
     <div class="anti-row">
-      <span class="anti-label">Auto-detección</span>
+      <span class="anti-label" id="labelAutoDetect">Auto-detect</span>
       <button class="toggle-btn" id="autoFbBtn">OFF</button>
     </div>
     <div class="anti-row">
-      <label class="anti-label" for="fbThresh">Sensibilidad</label>
-      <input id="fbThresh" type="range" min="-75" max="-20" step="1" value="-48" style="width:110px;" />
+      <label class="anti-label" for="fbThresh" id="labelSensitivity">Sensitivity</label>
+      <input id="fbThresh" type="range" min="-75" max="-20" step="1" value="-48" style="width:110px;"/>
       <span class="val" id="fbThreshVal" style="width:46px">-48dB</span>
     </div>
     <div class="notches-wrap" id="notchesWrap">
-      <span class="empty-hint">Sin filtros activos</span>
+      <span class="empty-hint" id="noFiltersHint">No active filters</span>
     </div>
   </div>
-
-  <!-- LOG CARD -->
   <div class="card">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-      <div class="card-title" style="margin-bottom:0;flex:1">Log de frecuencias</div>
-      <button class="toggle-btn" id="logPauseBtn">Pausar</button>
-      <button class="toggle-btn" id="logCopyBtn">Copiar</button>
-      <button class="toggle-btn" id="logClearBtn">Limpiar</button>
+    <div class="log-header">
+      <div class="card-title" id="titleLog">Frequency log</div>
+      <button class="toggle-btn" id="logEnableBtn">OFF</button>
+      <button class="toggle-btn" id="logPauseBtn">Pause</button>
+      <button class="toggle-btn" id="logCopyBtn">Copy</button>
+      <button class="toggle-btn" id="logClearBtn">Clear</button>
     </div>
-    <pre id="logBody" style="font-size:10px;color:var(--muted);overflow-y:auto;max-height:130px;white-space:pre;font-family:monospace;margin:0;line-height:1.5;">Sin datos aún…</pre>
+    <pre id="logBody">—</pre>
   </div>
-
-  <!-- STATUS BAR -->
-  <div class="status-bar">
-    <span class="status-text" id="statusText">Listo</span>
-  </div>
-
-</div><!-- /wrap -->
-
+</div>
 <script>
-(() => {
+(()=>{
 "use strict";
+const LANG=navigator.language?.toLowerCase().startsWith("es")?"es":"en";
+const T=({
+  es:{
+    offline:"Offline",live:"Live",start:"Iniciar",stop:"Detener",
+    controls:"Controles",volume:"Volumen",echo:"Eco",delay:"Delay",
+    antiFb:"Anti-Acople",autoDetect:"Auto-detección",sensitivity:"Sensibilidad",
+    noFilters:"Sin filtros activos",tapFilter:"toca para filtrar",
+    freqLog:"Log de frecuencias",
+    pause:"Pausar",resume:"Reanudar",copy:"Copiar",clear:"Limpiar",
+    noData:"Sin datos aún…",logDisabled:"Log desactivado",reset:"Reset",
+    micReady:"Mic activo — eco listo",micCompat:"Mic activo (modo compat.)",
+    autoFilterMsg:(loc,hz)=>`Auto-filtro (${loc}): ${hz}Hz`,
+    locHigh:"alta",locMid:"media",
+    logCopied:"Log copiado",logCopyErr:"Error copiando log",
+    hints:{sala:"Sala: eco corto, natural (ideal para práctica).",catedral:"Catedral: eco largo y amplio. Cuidado con acoples."},
+    presets:{sala:"Sala",catedral:"Catedral"},
+  },
+  en:{
+    offline:"Offline",live:"Live",start:"Start",stop:"Stop",
+    controls:"Controls",volume:"Volume",echo:"Echo",delay:"Delay",
+    antiFb:"Anti-Feedback",autoDetect:"Auto-detect",sensitivity:"Sensitivity",
+    noFilters:"No active filters",tapFilter:"tap to add filter",
+    freqLog:"Frequency log",
+    pause:"Pause",resume:"Resume",copy:"Copy",clear:"Clear",
+    noData:"No data yet…",logDisabled:"Log disabled",reset:"Reset",
+    micReady:"Mic active — echo ready",micCompat:"Mic active (compat mode)",
+    autoFilterMsg:(loc,hz)=>`Auto-filter (${loc}): ${hz}Hz`,
+    locHigh:"high",locMid:"mid",
+    logCopied:"Log copied",logCopyErr:"Error copying log",
+    hints:{sala:"Room: short echo, natural (ideal for practice).",catedral:"Cathedral: long echo. Watch for feedback."},
+    presets:{sala:"Room",catedral:"Cathedral"},
+  },
+})[LANG];
 
-// ── PRESETS ──────────────────────────────────────────────────────────────────
-const PRESETS = {
-  sala:     { name:"Sala",     delayMs:180, feedback:0.35, mix:0.25,
-              hint:"Sala: eco corto, natural (ideal para práctica)." },
-  catedral: { name:"Catedral", delayMs:320, feedback:0.55, mix:0.38,
-              hint:"Catedral: eco largo y amplio. Cuidado con acoples." },
+const PRESETS={
+  sala:    {delayMs:180,feedback:0.35,mix:0.25},
+  catedral:{delayMs:320,feedback:0.55,mix:0.38},
 };
-const DEFAULTS = { gain:3.5, presetKey:"sala" };
+const DEFAULTS={gain:3.5,presetKey:"sala"};
+const FLUTE_LO=262,FLUTE_HI=2093,SPEC_LO=100,SPEC_HI=8000;
+const MAX_NOTCHES=8,FB_FRAMES_AUTO=28,NOTCH_Q=28,NOTCH_MERGE_HZ=45;
 
-// Flute C4–C7, spectrum display range
-const FLUTE_LO = 262, FLUTE_HI = 2093;
-const SPEC_LO  = 100, SPEC_HI  = 8000;
+const $=id=>document.getElementById(id);
+const micBtn=$("micBtn"),micBtnLabel=$("micBtnLabel");
+const liveDot=$("liveDot"),liveText=$("liveText");
+const vuBar=$("vuBar");
+const volGain=$("volGain"),volGainVal=$("volGainVal");
+const echoAmt=$("echoAmt"),echoAmtVal=$("echoAmtVal");
+const delayMs=$("delayMs"),delayMsVal=$("delayMsVal");
+const presetHint=$("presetHint"),resetBtn=$("resetBtn");
+const specCanvas=$("specCanvas"),specCtx=specCanvas.getContext("2d");
+const autoFbBtn=$("autoFbBtn"),fbThresh=$("fbThresh"),fbThreshVal=$("fbThreshVal");
+const notchesWrap=$("notchesWrap");
+const themeToggle=$("themeToggle"),themeIcon=$("themeIcon");
+const logEnableBtn=$("logEnableBtn"),logPauseBtn=$("logPauseBtn"),logCopyBtn=$("logCopyBtn"),logClearBtn=$("logClearBtn");
 
-const MAX_NOTCHES    = 8;
-const FB_FRAMES_AUTO = 28;   // ~1 s at ~30 fps
-const NOTCH_Q        = 28;
-const NOTCH_MERGE_HZ = 45;
+let audioCtx=null,stream=null,workletNode=null,inputGain=null,analyserNode=null;
+let nativeDryGain=null,nativeWetGain=null,nativeDelay=null,nativeFeedback=null,nativeOutput=null;
+let presetKey=DEFAULTS.presetKey,useWorklet=false,autoFbEnabled=false;
+let rafVU=null,rafSpec=null,notchFilters=[],fbHistory=null;
 
-// ── DOM ──────────────────────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const micBtn     = $("micBtn"),    micBtnLabel = $("micBtnLabel");
-const liveDot    = $("liveDot"),   liveText    = $("liveText");
-const btDot      = $("btDot"),     btText      = $("btText"),   btBadge = $("btBadge");
-const statusText = $("statusText");
-const levelText  = $("levelText"), vuBar       = $("vuBar");
-const volGain    = $("volGain"),   volGainVal  = $("volGainVal");
-const echoAmt    = $("echoAmt"),   echoAmtVal  = $("echoAmtVal");
-const delayMs    = $("delayMs"),   delayMsVal  = $("delayMsVal");
-const presetBtn  = $("presetBtn"), presetLabel = $("presetLabel"), presetHint = $("presetHint");
-const resetBtn   = $("resetBtn");
-const specCanvas = $("specCanvas"),specCtx     = specCanvas.getContext("2d");
-const autoFbBtn  = $("autoFbBtn"), fbThresh    = $("fbThresh"),  fbThreshVal = $("fbThreshVal");
-const notchesWrap= $("notchesWrap");
-
-// ── AUDIO STATE ───────────────────────────────────────────────────────────────
-let audioCtx      = null;
-let stream        = null;
-let workletNode   = null;
-let inputGain     = null;
-let analyserNode  = null;
-// native fallback nodes (used when AudioWorklet unavailable)
-let nativeDryGain = null, nativeWetGain  = null;
-let nativeDelay   = null, nativeFeedback = null;
-let nativeOutput  = null;
-
-// ── APP STATE ─────────────────────────────────────────────────────────────────
-let presetKey  = DEFAULTS.presetKey;
-let useWorklet = false;
-let autoFbEnabled  = false;
-let rafVU = null, rafSpec = null;
-
-// notchFilters: [{ hz, node (BiquadFilterNode|null), source:"auto"|"manual" }]
-let notchFilters = [];
-let fbHistory    = null;
-
-// ── CANVAS ───────────────────────────────────────────────────────────────────
-let cW = 0, cH = 0;
-function resizeCanvas() {
-  const dpr  = window.devicePixelRatio || 1;
-  const rect = specCanvas.getBoundingClientRect();
-  const nw   = Math.round(rect.width  * dpr);
-  const nh   = Math.round(rect.height * dpr);
-  if (nw === cW && nh === cH) return;
-  cW = specCanvas.width  = nw;
-  cH = specCanvas.height = nh;
+// ── CANVAS
+let cW=0,cH=0;
+function resizeCanvas(){
+  const dpr=window.devicePixelRatio||1,rect=specCanvas.getBoundingClientRect();
+  const nw=Math.round(rect.width*dpr),nh=Math.round(rect.height*dpr);
+  if(nw===cW&&nh===cH)return;
+  cW=specCanvas.width=nw;cH=specCanvas.height=nh;
 }
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener("resize",resizeCanvas);
 requestAnimationFrame(resizeCanvas);
 
-// Log-scale helpers
-function freqToX(hz) {
-  const logLo = Math.log10(SPEC_LO), logHi = Math.log10(SPEC_HI);
-  return ((Math.log10(Math.max(SPEC_LO, Math.min(SPEC_HI, hz))) - logLo) / (logHi - logLo)) * cW;
+function freqToX(hz){
+  const lo=Math.log10(SPEC_LO),hi=Math.log10(SPEC_HI);
+  return((Math.log10(Math.max(SPEC_LO,Math.min(SPEC_HI,hz)))-lo)/(hi-lo))*cW;
 }
-function xToFreq(x) {
-  const logLo = Math.log10(SPEC_LO), logHi = Math.log10(SPEC_HI);
-  return Math.pow(10, logLo + (x / cW) * (logHi - logLo));
+function xToFreq(x){
+  const lo=Math.log10(SPEC_LO),hi=Math.log10(SPEC_HI);
+  return Math.pow(10,lo+(x/cW)*(hi-lo));
 }
-function fmtHz(hz) {
-  return hz >= 1000 ? `${(hz/1000).toFixed(1)}k` : `${Math.round(hz)}`;
+function fmtHz(hz){return hz>=1000?`${(hz/1000).toFixed(1)}k`:`${Math.round(hz)}`;}
+
+// ── THEME
+const SUN=`<path d="M12 5V3M12 21v-2M5 12H3M21 12h-2M7.05 7.05 5.64 5.64M18.36 18.36l-1.41-1.41M7.05 16.95l-1.41 1.41M18.36 5.64l-1.41 1.41" stroke-linecap="round"/><circle cx="12" cy="12" r="4"/>`;
+const MOON=`<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+function applyTheme(t){
+  document.documentElement.setAttribute("data-theme",t);
+  themeIcon.innerHTML=t==="dark"?MOON:SUN;
+  localStorage.setItem("fe-theme",t);
+}
+themeToggle.addEventListener("click",()=>{
+  applyTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");
+});
+
+// ── I18N
+function applyI18n(){
+  document.documentElement.lang=LANG;
+  liveText.textContent=T.offline;
+  micBtnLabel.textContent=T.start;
+  $("titleControls").textContent=T.controls;
+  $("labelVolume").textContent=T.volume;
+  $("labelEcho").textContent=T.echo;
+  $("labelDelay").textContent=T.delay;
+  $("titleAntiFb").textContent=T.antiFb;
+  $("labelAutoDetect").textContent=T.autoDetect;
+  $("labelSensitivity").textContent=T.sensitivity;
+  $("noFiltersHint").textContent=T.noFilters;
+  $("tapHint").textContent=T.tapFilter;
+  $("titleLog").textContent=T.freqLog;
+  $("resetLabel").textContent=T.reset;
+  $("presetSala").textContent=T.presets.sala;
+  $("presetCatedral").textContent=T.presets.catedral;
+  logPauseBtn.textContent=T.pause;
+  logCopyBtn.textContent=T.copy;
+  logClearBtn.textContent=T.clear;
+  logEnableBtn.textContent="OFF";
+  $("logBody").textContent=T.logDisabled;
+  updatePresetHint();
 }
 
-// ── UI HELPERS ────────────────────────────────────────────────────────────────
-function setStatus(msg)    { statusText.textContent = msg; }
-function setLive(live) {
-  liveDot.classList.toggle("live", live);
-  liveText.textContent    = live ? "Live" : "Offline";
-  micBtn.classList.toggle("on", live);
-  micBtnLabel.textContent = live ? "Detener" : "Iniciar";
+// ── UI
+function setLive(live){
+  liveDot.classList.toggle("live",live);
+  liveText.textContent=live?T.live:T.offline;
+  micBtn.classList.toggle("on",live);
+  micBtnLabel.textContent=live?T.stop:T.start;
 }
-function updateLabels() {
-  volGainVal.textContent  = `${Number(volGain.value).toFixed(1)}×`;
-  echoAmtVal.textContent  = `${Math.round(Number(echoAmt.value)*100)}%`;
-  delayMsVal.textContent  = `${delayMs.value}ms`;
-  fbThreshVal.textContent = `${fbThresh.value}dB`;
-  autoFbBtn.classList.toggle("on",  autoFbEnabled);
-  autoFbBtn.textContent = autoFbEnabled ? "ON" : "OFF";
-  const p = PRESETS[presetKey];
-  presetLabel.textContent = p.name;
-  presetHint.textContent  = p.hint;
-}
-
-// ── NOTCH MANAGEMENT ─────────────────────────────────────────────────────────
-function notchExists(hz) {
-  return notchFilters.some(n => Math.abs(n.hz - hz) < NOTCH_MERGE_HZ);
-}
-function addNotch(hz, source = "manual") {
-  if (notchFilters.length >= MAX_NOTCHES || notchExists(hz)) return;
-  let node = null;
-  if (audioCtx) {
-    node = audioCtx.createBiquadFilter();
-    node.type            = "notch";
-    node.frequency.value = hz;
-    node.Q.value         = NOTCH_Q;
-  }
-  notchFilters.push({ hz, node, source });
-  rebuildNotchChain();
-  renderNotchChips();
-}
-function removeNotch(hz) {
-  const idx = notchFilters.findIndex(n => Math.abs(n.hz - hz) < 1);
-  if (idx === -1) return;
-  try { notchFilters[idx].node?.disconnect(); } catch {}
-  notchFilters.splice(idx, 1);
-  rebuildNotchChain();
-  renderNotchChips();
-}
-function clearNotches() {
-  notchFilters.forEach(f => { try { f.node?.disconnect(); } catch {} });
-  notchFilters = [];
-  rebuildNotchChain();
-  renderNotchChips();
+function updatePresetHint(){presetHint.textContent=T.hints[presetKey];}
+function updateLabels(){
+  volGainVal.textContent=`${Number(volGain.value).toFixed(1)}×`;
+  echoAmtVal.textContent=`${Math.round(Number(echoAmt.value)*100)}%`;
+  delayMsVal.textContent=`${delayMs.value}ms`;
+  fbThreshVal.textContent=`${fbThresh.value}dB`;
+  autoFbBtn.classList.toggle("on",autoFbEnabled);
+  autoFbBtn.textContent=autoFbEnabled?"ON":"OFF";
+  updatePresetHint();
+  document.querySelectorAll(".seg-btn").forEach(b=>b.classList.toggle("active",b.dataset.key===presetKey));
 }
 
-/**
- * Rebuild chain: inputGain → [notch1 → notch2 → …] → analyserNode
- * analyserNode → workletNode → destination stays fixed.
- */
-function rebuildNotchChain() {
-  if (!inputGain || !analyserNode) return;
-  try { inputGain.disconnect(); } catch {}
-  notchFilters.forEach(f => { try { f.node?.disconnect(); } catch {} });
-  let cur = inputGain;
-  for (const f of notchFilters) {
-    if (f.node) { cur.connect(f.node); cur = f.node; }
-  }
+// ── NOTCHES
+function notchExists(hz){return notchFilters.some(n=>Math.abs(n.hz-hz)<NOTCH_MERGE_HZ);}
+function addNotch(hz,source="manual"){
+  if(notchFilters.length>=MAX_NOTCHES||notchExists(hz))return;
+  let node=null;
+  if(audioCtx){node=audioCtx.createBiquadFilter();node.type="notch";node.frequency.value=hz;node.Q.value=NOTCH_Q;}
+  notchFilters.push({hz,node,source});
+  rebuildNotchChain();renderNotchChips();
+}
+function removeNotch(hz){
+  const idx=notchFilters.findIndex(n=>Math.abs(n.hz-hz)<1);
+  if(idx===-1)return;
+  try{notchFilters[idx].node?.disconnect();}catch{}
+  notchFilters.splice(idx,1);rebuildNotchChain();renderNotchChips();
+}
+function clearNotches(){
+  notchFilters.forEach(f=>{try{f.node?.disconnect();}catch{}});
+  notchFilters=[];rebuildNotchChain();renderNotchChips();
+}
+function rebuildNotchChain(){
+  if(!inputGain||!analyserNode)return;
+  try{inputGain.disconnect();}catch{}
+  notchFilters.forEach(f=>{try{f.node?.disconnect();}catch{}});
+  let cur=inputGain;
+  for(const f of notchFilters){if(f.node){cur.connect(f.node);cur=f.node;}}
   cur.connect(analyserNode);
 }
-
-function renderNotchChips() {
-  if (notchFilters.length === 0) {
-    notchesWrap.innerHTML = '<span class="empty-hint">Sin filtros activos</span>';
-    return;
-  }
-  notchesWrap.innerHTML = notchFilters.map(f =>
+function renderNotchChips(){
+  if(notchFilters.length===0){notchesWrap.innerHTML=`<span class="empty-hint">${T.noFilters}</span>`;return;}
+  notchesWrap.innerHTML=notchFilters.map(f=>
     `<div class="notch-chip${f.source==="auto"?" auto":""}">
        ${fmtHz(f.hz)}Hz
-       <button onclick="window.__rmNotch(${f.hz})" aria-label="Quitar ${fmtHz(f.hz)}Hz">×</button>
+       <button onclick="window.__rmNotch(${f.hz})" aria-label="×">×</button>
      </div>`
   ).join("");
 }
-window.__rmNotch = hz => removeNotch(hz);
+window.__rmNotch=hz=>removeNotch(hz);
 
-// ── BLUETOOTH DETECTION ───────────────────────────────────────────────────────
-async function checkBluetooth() {
-  if (!navigator.mediaDevices?.enumerateDevices) { setBT("unknown"); return; }
-  try {
-    const devs  = await navigator.mediaDevices.enumerateDevices();
-    const outs  = devs.filter(d => d.kind === "audiooutput");
-    const btRe  = /bluetooth|bt\b|a2dp|sco|wireless/i;
-    const hasBT = outs.some(d => btRe.test(d.label));
-    setBT(hasBT ? "ok" : outs.length === 0 ? "unknown" : "none");
-  } catch { setBT("unknown"); }
+// ── PARAMS
+function sendWorkletParams(){
+  if(!workletNode)return;
+  const p=PRESETS[presetKey];
+  workletNode.port.postMessage({inGain:Number(volGain.value),delayMs:Number(delayMs.value),feedback:p.feedback,wet:Number(echoAmt.value),outVol:0.85,gate:0.0});
 }
-function setBT(status) {
-  btDot.className = "dot"; btBadge.className = "badge";
-  if (status === "ok") {
-    btDot.classList.add("bt"); btText.textContent = "BT ✓"; btBadge.classList.add("ok");
-  } else {
-    btText.textContent = "BT?";
-  }
+function sendNativeParams(){
+  if(!nativeOutput)return;
+  const p=PRESETS[presetKey],wet=Number(echoAmt.value);
+  if(inputGain)inputGain.gain.value=Number(volGain.value);
+  if(nativeDryGain)nativeDryGain.gain.value=1-wet;
+  if(nativeWetGain)nativeWetGain.gain.value=wet;
+  if(nativeDelay)nativeDelay.delayTime.value=Number(delayMs.value)/1000;
+  if(nativeFeedback)nativeFeedback.gain.value=p.feedback;
 }
-navigator.mediaDevices?.addEventListener("devicechange", () => checkBluetooth());
+function sendParams(){if(useWorklet)sendWorkletParams();else sendNativeParams();}
 
-// ── WORKLET PARAMS ────────────────────────────────────────────────────────────
-function sendWorkletParams() {
-  if (!workletNode) return;
-  const p = PRESETS[presetKey];
-  workletNode.port.postMessage({
-    inGain:   Number(volGain.value),
-    delayMs:  Number(delayMs.value),
-    feedback: p.feedback,
-    wet:      Number(echoAmt.value),
-    outVol:   0.85,
-    gate:     0.0,
-  });
-}
-
-function sendNativeParams() {
-  if (!nativeOutput) return;
-  const p   = PRESETS[presetKey];
-  const wet = Number(echoAmt.value);
-  if (inputGain)     inputGain.gain.value        = Number(volGain.value);
-  if (nativeDryGain) nativeDryGain.gain.value    = 1 - wet;
-  if (nativeWetGain) nativeWetGain.gain.value    = wet;
-  if (nativeDelay)   nativeDelay.delayTime.value = Number(delayMs.value) / 1000;
-  if (nativeFeedback)nativeFeedback.gain.value   = p.feedback;
-}
-function sendParams() {
-  if (useWorklet) sendWorkletParams();
-  else            sendNativeParams();
-}
-
-// ── AUDIO GRAPH BUILD / TEAR ──────────────────────────────────────────────────
-function teardownGraph() {
+// ── GRAPH
+function teardownGraph(){
   stopAnimations();
-  if (workletNode)   { try { workletNode.disconnect();   } catch {} workletNode   = null; }
-  if (nativeOutput)  { try { nativeOutput.disconnect();  } catch {} nativeOutput  = null; }
-  if (nativeDryGain) { try { nativeDryGain.disconnect(); } catch {} nativeDryGain = null; }
-  if (nativeWetGain) { try { nativeWetGain.disconnect(); } catch {} nativeWetGain = null; }
-  if (nativeDelay)   { try { nativeDelay.disconnect();   } catch {} nativeDelay   = null; }
-  if (nativeFeedback){ try { nativeFeedback.disconnect();} catch {} nativeFeedback = null; }
-  if (analyserNode)  { try { analyserNode.disconnect();  } catch {} analyserNode  = null; }
-  if (inputGain)     { try { inputGain.disconnect();     } catch {} inputGain     = null; }
-  notchFilters = notchFilters.map(f => ({ ...f, node: null }));
+  [workletNode,nativeOutput,nativeDryGain,nativeWetGain,nativeDelay,nativeFeedback,analyserNode,inputGain]
+    .forEach(n=>{if(n){try{n.disconnect();}catch{}}});
+  workletNode=nativeOutput=nativeDryGain=nativeWetGain=nativeDelay=nativeFeedback=analyserNode=inputGain=null;
+  notchFilters=notchFilters.map(f=>({...f,node:null}));
 }
-
-async function buildGraph() {
-  if (!audioCtx || !stream) return;
-
-  inputGain = audioCtx.createGain();
-  inputGain.gain.value = 1.0;
-
-  analyserNode = audioCtx.createAnalyser();
-  analyserNode.fftSize               = 4096;
-  analyserNode.smoothingTimeConstant = 0.78;
-
-  const source = audioCtx.createMediaStreamSource(stream);
+async function buildGraph(){
+  if(!audioCtx||!stream)return;
+  inputGain=audioCtx.createGain();inputGain.gain.value=1.0;
+  analyserNode=audioCtx.createAnalyser();analyserNode.fftSize=4096;analyserNode.smoothingTimeConstant=0.78;
+  const source=audioCtx.createMediaStreamSource(stream);
   source.connect(inputGain);
-
-  // Recreate notch BiquadFilter nodes for the fresh AudioContext
-  notchFilters = notchFilters.map(f => {
-    const node = audioCtx.createBiquadFilter();
-    node.type = "notch"; node.frequency.value = f.hz; node.Q.value = NOTCH_Q;
-    return { ...f, node };
+  notchFilters=notchFilters.map(f=>{
+    const node=audioCtx.createBiquadFilter();node.type="notch";node.frequency.value=f.hz;node.Q.value=NOTCH_Q;
+    return{...f,node};
   });
-
-  rebuildNotchChain(); // inputGain → [notches] → analyserNode
-
-  if (useWorklet) {
-    workletNode = new AudioWorkletNode(audioCtx, "mic-delay-processor");
-    analyserNode.connect(workletNode);
-    workletNode.connect(audioCtx.destination);
-  } else {
-    // Native fallback echo graph (no worklet)
-    const p   = PRESETS[presetKey];
-    const wet = Number(echoAmt.value);
-    nativeOutput   = audioCtx.createGain();   nativeOutput.gain.value   = 0.85;
-    nativeDryGain  = audioCtx.createGain();   nativeDryGain.gain.value  = 1 - wet;
-    nativeWetGain  = audioCtx.createGain();   nativeWetGain.gain.value  = wet;
-    nativeDelay    = audioCtx.createDelay(5); nativeDelay.delayTime.value = p.delayMs / 1000;
-    nativeFeedback = audioCtx.createGain();   nativeFeedback.gain.value = p.feedback;
-    analyserNode.connect(nativeDryGain);
-    nativeDryGain.connect(nativeOutput);
-    analyserNode.connect(nativeDelay);
-    nativeDelay.connect(nativeWetGain);
-    nativeWetGain.connect(nativeOutput);
-    nativeDelay.connect(nativeFeedback);
-    nativeFeedback.connect(nativeDelay);
+  rebuildNotchChain();
+  if(useWorklet){
+    workletNode=new AudioWorkletNode(audioCtx,"mic-delay-processor");
+    analyserNode.connect(workletNode);workletNode.connect(audioCtx.destination);
+  }else{
+    const p=PRESETS[presetKey],wet=Number(echoAmt.value);
+    nativeOutput=audioCtx.createGain();nativeOutput.gain.value=0.85;
+    nativeDryGain=audioCtx.createGain();nativeDryGain.gain.value=1-wet;
+    nativeWetGain=audioCtx.createGain();nativeWetGain.gain.value=wet;
+    nativeDelay=audioCtx.createDelay(5);nativeDelay.delayTime.value=p.delayMs/1000;
+    nativeFeedback=audioCtx.createGain();nativeFeedback.gain.value=p.feedback;
+    analyserNode.connect(nativeDryGain);nativeDryGain.connect(nativeOutput);
+    analyserNode.connect(nativeDelay);nativeDelay.connect(nativeWetGain);nativeWetGain.connect(nativeOutput);
+    nativeDelay.connect(nativeFeedback);nativeFeedback.connect(nativeDelay);
     nativeOutput.connect(audioCtx.destination);
-    setStatus("Mic activo (modo compatibilidad)");
   }
-
-  fbHistory = new Float32Array(analyserNode.frequencyBinCount);
+  fbHistory=new Float32Array(analyserNode.frequencyBinCount);
   sendParams();
 }
 
-// ── MIC START / STOP ──────────────────────────────────────────────────────────
-async function startMic() {
-  setStatus("Solicitando micrófono…");
-
-  // Always close old context to prevent hardware lock / silent failure on restart
-  if (audioCtx) {
-    try { await audioCtx.close(); } catch {}
-    audioCtx = null;
-  }
-
-  stream = await navigator.mediaDevices.getUserMedia({
-    audio: {
-      echoCancellation: false,
-      noiseSuppression: false,
-      autoGainControl:  false,
-    }
-  });
-
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === "suspended") await audioCtx.resume();
-
-  try {
-    await audioCtx.audioWorklet.addModule("./delay-worklet.js");
-    useWorklet = true;
-  } catch (e) {
-    console.warn("AudioWorklet no disponible, usando grafo nativo:", e);
-    useWorklet = false;
-  }
-  await buildGraph();
-  startAnimations();
-  setLive(true);
-  setStatus("Mic activo — eco listo");
-  await checkBluetooth();  // labels available after getUserMedia permission
+// ── MIC START/STOP
+async function startMic(){
+  if(audioCtx){try{await audioCtx.close();}catch{}audioCtx=null;}
+  stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended")await audioCtx.resume();
+  try{await audioCtx.audioWorklet.addModule("./delay-worklet.js");useWorklet=true;}
+  catch(e){console.warn("AudioWorklet unavailable:",e);useWorklet=false;}
+  await buildGraph();startAnimations();setLive(true);
+}
+async function stopMic(){
+  setLive(false);teardownGraph();
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  if(audioCtx){try{await audioCtx.close();}catch{}audioCtx=null;}
 }
 
-async function stopMic() {
-  setStatus("Deteniendo…");
-  setLive(false);
-  teardownGraph();
-
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-  }
-
-  // Close AudioContext to release hardware — this is the stop/start bug fix
-  if (audioCtx) {
-    try { await audioCtx.close(); } catch {}
-    audioCtx = null;
-  }
-
-  setStatus("Listo");
+// ── ANIMATIONS
+function startAnimations(){stopAnimations();vuLoop();specLoop();if(logEnabled)startLog();}
+function stopAnimations(){
+  if(rafVU){cancelAnimationFrame(rafVU);rafVU=null;}
+  if(rafSpec){cancelAnimationFrame(rafSpec);rafSpec=null;}
+  stopLog();vuBar.style.width="0%";vuBar.classList.remove("clip");
 }
 
-// ── ANIMATION LOOPS ───────────────────────────────────────────────────────────
-function startAnimations() { stopAnimations(); vuLoop(); specLoop(); startLog(); }
-function stopAnimations() {
-  if (rafVU)   { cancelAnimationFrame(rafVU);   rafVU   = null; }
-  if (rafSpec) { cancelAnimationFrame(rafSpec); rafSpec = null; }
-  stopLog();
-  vuBar.style.width = "0%";
-  vuBar.classList.remove("clip");
-  levelText.textContent = "—";
-}
-
-function vuLoop() {
-  if (!analyserNode) return;
-  const data = new Float32Array(analyserNode.frequencyBinCount);
-  const tick = () => {
-    if (!analyserNode) return;
+function vuLoop(){
+  if(!analyserNode)return;
+  const data=new Float32Array(analyserNode.frequencyBinCount);
+  const tick=()=>{
+    if(!analyserNode)return;
     analyserNode.getFloatFrequencyData(data);
-    // Find peak dBFS across all bins
-    let peakDb = -Infinity;
-    for (let i = 0; i < data.length; i++) if (data[i] > peakDb) peakDb = data[i];
-    // Map [-80, -30] dBFS → [0, 100]%  (signals at -73 to -55 dB → 14% to 50%)
-    const pct = Math.max(0, Math.min(100, (peakDb + 80) / 50 * 100));
-    vuBar.style.width = `${pct}%`;
-    vuBar.classList.toggle("clip", pct > 90);
-    levelText.textContent = peakDb < -73 ? "—" : peakDb < -50 ? "OK" : "Alto";
-    rafVU = requestAnimationFrame(tick);
+    let peakDb=-Infinity;
+    for(let i=0;i<data.length;i++)if(data[i]>peakDb)peakDb=data[i];
+    const pct=Math.max(0,Math.min(100,(peakDb+80)/50*100));
+    vuBar.style.width=`${pct}%`;vuBar.classList.toggle("clip",pct>90);
+    rafVU=requestAnimationFrame(tick);
   };
-  rafVU = requestAnimationFrame(tick);
+  rafVU=requestAnimationFrame(tick);
 }
 
-function specLoop() {
-  if (!analyserNode) return;
-  const freqData = new Float32Array(analyserNode.frequencyBinCount);
-  const tick = () => {
-    if (!analyserNode) return;
+function specLoop(){
+  if(!analyserNode)return;
+  const freqData=new Float32Array(analyserNode.frequencyBinCount);
+  const tick=()=>{
+    if(!analyserNode)return;
     analyserNode.getFloatFrequencyData(freqData);
-    const sr   = audioCtx?.sampleRate || 48000;
-    const fftS = analyserNode.fftSize;
-    drawSpectrum(freqData, sr, fftS);
-    if (autoFbEnabled) detectFeedback(freqData, sr, fftS);
-    rafSpec = requestAnimationFrame(tick);
+    const sr=audioCtx?.sampleRate||48000,fftS=analyserNode.fftSize;
+    drawSpectrum(freqData,sr,fftS);
+    if(autoFbEnabled)detectFeedback(freqData,sr,fftS);
+    rafSpec=requestAnimationFrame(tick);
   };
-  rafSpec = requestAnimationFrame(tick);
+  rafSpec=requestAnimationFrame(tick);
 }
 
-// ── SPECTRUM DRAW ─────────────────────────────────────────────────────────────
-const AXIS_HZ = [100, 200, 500, 1000, 2000, 4000, 8000];
-
-function drawSpectrum(freqData, sr, fftSize) {
-  resizeCanvas();
-  if (cW === 0 || cH === 0) return;
-  const dpr = window.devicePixelRatio || 1;
-
-  specCtx.fillStyle = "#090e1a";
-  specCtx.fillRect(0, 0, cW, cH);
-
-  // Flute range highlight
-  specCtx.fillStyle = "rgba(59,130,246,.08)";
-  specCtx.fillRect(freqToX(FLUTE_LO), 0, freqToX(FLUTE_HI)-freqToX(FLUTE_LO), cH);
-
-  // Axis gridlines + labels
-  specCtx.setLineDash([2, 4]); specCtx.lineWidth = 1;
-  specCtx.font = `${Math.round(8.5*dpr)}px system-ui`;
-  for (const hz of AXIS_HZ) {
-    const x = freqToX(hz);
-    specCtx.strokeStyle = "rgba(148,163,184,.10)";
-    specCtx.beginPath(); specCtx.moveTo(x,0); specCtx.lineTo(x,cH); specCtx.stroke();
-    specCtx.fillStyle = "rgba(148,163,184,.30)";
-    specCtx.fillText(hz>=1000?`${hz/1000}k`:`${hz}`, x+2, cH-3);
+const AXIS_HZ=[100,200,500,1000,2000,4000,8000];
+function drawSpectrum(freqData,sr,fftSize){
+  resizeCanvas();if(cW===0||cH===0)return;
+  const dpr=window.devicePixelRatio||1;
+  const isDark=document.documentElement.getAttribute("data-theme")!=="light";
+  specCtx.fillStyle=isDark?"#090e1a":"#dde4ef";specCtx.fillRect(0,0,cW,cH);
+  specCtx.fillStyle=isDark?"rgba(59,130,246,.08)":"rgba(59,130,246,.12)";
+  specCtx.fillRect(freqToX(FLUTE_LO),0,freqToX(FLUTE_HI)-freqToX(FLUTE_LO),cH);
+  specCtx.setLineDash([2,4]);specCtx.lineWidth=1;
+  specCtx.font=`${Math.round(8.5*dpr)}px system-ui`;
+  for(const hz of AXIS_HZ){
+    const x=freqToX(hz);
+    specCtx.strokeStyle=isDark?"rgba(148,163,184,.10)":"rgba(100,116,139,.20)";
+    specCtx.beginPath();specCtx.moveTo(x,0);specCtx.lineTo(x,cH);specCtx.stroke();
+    specCtx.fillStyle=isDark?"rgba(148,163,184,.35)":"rgba(71,85,105,.55)";
+    specCtx.fillText(hz>=1000?`${hz/1000}k`:`${hz}`,x+2,cH-3);
   }
   specCtx.setLineDash([]);
-
-  // Frequency bars
-  const minDb = -88, maxDb = -10, binCount = freqData.length;
-  for (let i = 1; i < binCount; i++) {
-    const hz = i * sr / fftSize;
-    if (hz < SPEC_LO || hz > SPEC_HI) continue;
-    const x    = freqToX(hz);
-    const xN   = freqToX((i+1)*sr/fftSize);
-    const barW = Math.max(1, xN - x);
-    const norm = (Math.max(minDb, Math.min(maxDb, freqData[i])) - minDb) / (maxDb - minDb);
-    const r = Math.round(20  + norm*235);
-    const g = Math.round(80  + norm*60);
-    const b = Math.round(190 - norm*150);
-    specCtx.fillStyle = `rgba(${r},${g},${b},.82)`;
-    specCtx.fillRect(x, cH - norm*cH, barW, norm*cH);
+  const minDb=-88,maxDb=-10,binCount=freqData.length;
+  for(let i=1;i<binCount;i++){
+    const hz=i*sr/fftSize;if(hz<SPEC_LO||hz>SPEC_HI)continue;
+    const x=freqToX(hz),xN=freqToX((i+1)*sr/fftSize),barW=Math.max(1,xN-x);
+    const norm=(Math.max(minDb,Math.min(maxDb,freqData[i]))-minDb)/(maxDb-minDb);
+    specCtx.fillStyle=`rgba(${Math.round(20+norm*235)},${Math.round(80+norm*60)},${Math.round(190-norm*150)},.82)`;
+    specCtx.fillRect(x,cH-norm*cH,barW,norm*cH);
   }
-
-  // Notch markers
-  for (const f of notchFilters) {
-    const x = freqToX(f.hz);
-    specCtx.strokeStyle = f.source==="auto" ? "rgba(245,158,11,.85)" : "rgba(239,68,68,.85)";
-    specCtx.lineWidth   = Math.max(1, 1.5*dpr);
-    specCtx.beginPath(); specCtx.moveTo(x,0); specCtx.lineTo(x,cH); specCtx.stroke();
-    specCtx.fillStyle   = f.source==="auto" ? "rgba(253,230,138,.80)" : "rgba(252,165,165,.80)";
-    specCtx.font        = `bold ${Math.round(8*dpr)}px system-ui`;
-    specCtx.fillText(fmtHz(f.hz), Math.max(2, Math.min(x-2, cW-24*dpr)), 10*dpr);
+  for(const f of notchFilters){
+    const x=freqToX(f.hz);
+    specCtx.strokeStyle=f.source==="auto"?"rgba(245,158,11,.85)":"rgba(239,68,68,.85)";
+    specCtx.lineWidth=Math.max(1,1.5*dpr);
+    specCtx.beginPath();specCtx.moveTo(x,0);specCtx.lineTo(x,cH);specCtx.stroke();
+    specCtx.fillStyle=f.source==="auto"?"rgba(253,230,138,.80)":"rgba(252,165,165,.80)";
+    specCtx.font=`bold ${Math.round(8*dpr)}px system-ui`;
+    specCtx.fillText(fmtHz(f.hz),Math.max(2,Math.min(x-2,cW-24*dpr)),10*dpr);
   }
 }
-
-// Draw empty idle spectrum
-requestAnimationFrame(() => {
+requestAnimationFrame(()=>{
   resizeCanvas();
-  specCtx.fillStyle = "#090e1a";
-  specCtx.fillRect(0, 0, cW, cH);
-  if (cW > 0 && cH > 0) {
-    specCtx.fillStyle = "rgba(59,130,246,.07)";
-    specCtx.fillRect(freqToX(FLUTE_LO), 0, freqToX(FLUTE_HI)-freqToX(FLUTE_LO), cH);
-  }
+  const isDark=document.documentElement.getAttribute("data-theme")!=="light";
+  specCtx.fillStyle=isDark?"#090e1a":"#dde4ef";specCtx.fillRect(0,0,cW,cH);
+  if(cW>0&&cH>0){specCtx.fillStyle=isDark?"rgba(59,130,246,.07)":"rgba(59,130,246,.11)";specCtx.fillRect(freqToX(FLUTE_LO),0,freqToX(FLUTE_HI)-freqToX(FLUTE_LO),cH);}
 });
 
-// ── AUTO FEEDBACK DETECTION ───────────────────────────────────────────────────
-function detectFeedback(freqData, sr, fftSize) {
-  if (!fbHistory || fbHistory.length !== freqData.length)
-    fbHistory = new Float32Array(freqData.length);
-  const threshold = Number(fbThresh.value);
-  // Scan full audio spectrum up to 18 kHz (catches high-freq feedback like 10.6 kHz phone/BT)
-  const minBin = Math.max(1, Math.floor(FLUTE_LO * fftSize / sr));
-  const maxBin = Math.min(freqData.length - 1, Math.floor(18000 * fftSize / sr));
-  for (let i = minBin; i <= maxBin; i++) {
-    // Outside the flute musical range: use a more sensitive threshold to catch
-    // early-stage phone/BT feedback (typically starts at -53 to -55 dBFS).
-    // No musical note exists above FLUTE_HI so any sustained signal there is suspect.
-    const binHz = i * sr / fftSize;
-    const effectiveThreshold = binHz > FLUTE_HI ? Math.min(threshold, -53) : threshold;
-    if (freqData[i] >= effectiveThreshold) {
+// ── FEEDBACK DETECTION
+function detectFeedback(freqData,sr,fftSize){
+  if(!fbHistory||fbHistory.length!==freqData.length)fbHistory=new Float32Array(freqData.length);
+  const threshold=Number(fbThresh.value);
+  const minBin=Math.max(1,Math.floor(FLUTE_LO*fftSize/sr));
+  const maxBin=Math.min(freqData.length-1,Math.floor(18000*fftSize/sr));
+  for(let i=minBin;i<=maxBin;i++){
+    const binHz=i*sr/fftSize;
+    const eff=binHz>FLUTE_HI?Math.min(threshold,-53):threshold;
+    if(freqData[i]>=eff){
       fbHistory[i]++;
-      if (fbHistory[i] >= FB_FRAMES_AUTO) {
-        const hz = i * sr / fftSize;
-        if (!notchExists(hz) && notchFilters.length < MAX_NOTCHES) {
-          addNotch(hz, "auto");
-          fbHistory[i] = 0;
-          const loc = hz > FLUTE_HI ? "alta" : "media";
-          setStatus(`Auto-filtro (${loc}): ${fmtHz(hz)}Hz`);
-          setTimeout(() => { if (stream) setStatus("Mic activo — eco listo"); }, 1500);
+      if(fbHistory[i]>=FB_FRAMES_AUTO){
+        const hz=i*sr/fftSize;
+        if(!notchExists(hz)&&notchFilters.length<MAX_NOTCHES){
+          addNotch(hz,"auto");fbHistory[i]=0;
+          const loc=hz>FLUTE_HI?T.locHigh:T.locMid;
+          console.info(T.autoFilterMsg(loc,fmtHz(hz)));
         }
       }
-    } else if (fbHistory[i] > 0) fbHistory[i]--;
+    }else if(fbHistory[i]>0)fbHistory[i]--;
   }
 }
 
-// ── PRESET ────────────────────────────────────────────────────────────────────
-function applyPreset(key) {
-  presetKey = key;
-  const p = PRESETS[key];
-  echoAmt.value = String(p.mix);
-  delayMs.value = String(p.delayMs);
-  updateLabels();
-  sendParams();
+// ── PRESET
+function applyPreset(key){
+  presetKey=key;const p=PRESETS[key];
+  echoAmt.value=String(p.mix);delayMs.value=String(p.delayMs);
+  updateLabels();sendParams();
 }
-function cyclePreset() {
-  const keys = Object.keys(PRESETS);
-  applyPreset(keys[(keys.indexOf(presetKey)+1) % keys.length]);
-}
+document.querySelectorAll(".seg-btn").forEach(btn=>btn.addEventListener("click",()=>applyPreset(btn.dataset.key)));
 
-// ── EVENTS ────────────────────────────────────────────────────────────────────
-micBtn.addEventListener("click", async () => {
-  try {
-    if (stream) await stopMic();
-    else        await startMic();
-  } catch (e) {
-    console.error(e);
-    await stopMic().catch(() => {});
-    setStatus(`Error: ${e?.message || "dispositivo no disponible"}`);
+// ── EVENTS
+micBtn.addEventListener("click",async()=>{
+  try{if(stream)await stopMic();else await startMic();}
+  catch(e){console.error(e);await stopMic().catch(()=>{});}
+});
+volGain.addEventListener("input",()=>{updateLabels();sendParams();});
+echoAmt.addEventListener("input",()=>{updateLabels();sendParams();});
+delayMs.addEventListener("input",()=>{updateLabels();sendParams();});
+fbThresh.addEventListener("input",()=>updateLabels());
+resetBtn.addEventListener("click",()=>{
+  presetKey=DEFAULTS.presetKey;volGain.value=String(DEFAULTS.gain);
+  applyPreset(presetKey);clearNotches();updateLabels();sendParams();
+});
+autoFbBtn.addEventListener("click",()=>{
+  autoFbEnabled=!autoFbEnabled;if(!autoFbEnabled)fbHistory=null;updateLabels();
+});
+specCanvas.addEventListener("click",e=>{
+  resizeCanvas();if(cW===0)return;
+  const rect=specCanvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  addNotch(Math.round(xToFreq((e.clientX-rect.left)*dpr)),"manual");
+});
+
+// ── LOG
+const LOG_MAX=120;
+let logEntries=[],logInterval=null,logPaused=false,logEnabled=false;
+
+function sampleLog(){
+  if(!analyserNode||!audioCtx)return;
+  const fftSize=analyserNode.fftSize,binCount=analyserNode.frequencyBinCount,sr=audioCtx.sampleRate;
+  const freqData=new Float32Array(binCount);analyserNode.getFloatFrequencyData(freqData);
+  let peakDb=-Infinity,peakHz=0,fluteDb=-Infinity,fluteHz=0;
+  for(let i=1;i<binCount;i++){
+    const hz=i*sr/fftSize,db=freqData[i];
+    if(db>peakDb){peakDb=db;peakHz=hz;}
+    if(hz>=FLUTE_LO&&hz<=FLUTE_HI&&db>fluteDb){fluteDb=db;fluteHz=hz;}
   }
-});
-
-volGain.addEventListener("input", () => { updateLabels(); sendParams(); });
-echoAmt.addEventListener("input", () => { updateLabels(); sendParams(); });
-delayMs.addEventListener("input", () => { updateLabels(); sendParams(); });
-fbThresh.addEventListener("input", () => updateLabels());
-
-presetBtn.addEventListener("click", () => cyclePreset());
-resetBtn.addEventListener("click", () => {
-  presetKey = DEFAULTS.presetKey;
-  volGain.value = String(DEFAULTS.gain);
-  applyPreset(presetKey);
-  clearNotches();
-  updateLabels();
-  sendParams();
-  setStatus("Reset aplicado");
-});
-autoFbBtn.addEventListener("click", () => {
-  autoFbEnabled = !autoFbEnabled;
-  if (!autoFbEnabled) fbHistory = null;
-  updateLabels();
-});
-
-// Tap on spectrum → manual notch at that frequency
-specCanvas.addEventListener("click", e => {
-  resizeCanvas();
-  if (cW === 0) return;
-  const rect = specCanvas.getBoundingClientRect();
-  const dpr  = window.devicePixelRatio || 1;
-  const x    = (e.clientX - rect.left) * dpr;
-  addNotch(Math.round(xToFreq(x)), "manual");
-});
-
-// ── FREQUENCY LOG ─────────────────────────────────────────────────────────────
-const LOG_MAX = 120;
-let logEntries  = [];
-let logInterval = null;
-let logPaused   = false;
-
-function sampleLog() {
-  if (!analyserNode || !audioCtx) return;
-  const fftSize  = analyserNode.fftSize;
-  const binCount = analyserNode.frequencyBinCount;
-  const sr       = audioCtx.sampleRate;
-  const freqData = new Float32Array(binCount);
-  analyserNode.getFloatFrequencyData(freqData);
-
-  let peakDb = -Infinity, peakHz = 0;
-  let fluteDb = -Infinity, fluteHz = 0;
-  for (let i = 1; i < binCount; i++) {
-    const hz = i * sr / fftSize;
-    const db = freqData[i];
-    if (db > peakDb) { peakDb = db; peakHz = hz; }
-    if (hz >= FLUTE_LO && hz <= FLUTE_HI && db > fluteDb) { fluteDb = db; fluteHz = hz; }
-  }
-  if (peakDb < -75) return; // silence — skip
-
-  const now = new Date();
-  const ts  = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
-  logEntries.push({ ts,
-    peakHz:Math.round(peakHz),  peakDb:Math.round(peakDb),
-    fluteHz:Math.round(fluteHz),fluteDb:Math.round(fluteDb) });
-  if (logEntries.length > LOG_MAX) logEntries.shift();
-  if (!logPaused) renderLog();
+  if(peakDb<-75)return;
+  const now=new Date();
+  const ts=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
+  logEntries.push({ts,peakHz:Math.round(peakHz),peakDb:Math.round(peakDb),fluteHz:Math.round(fluteHz),fluteDb:Math.round(fluteDb)});
+  if(logEntries.length>LOG_MAX)logEntries.shift();
+  if(!logPaused)renderLog();
 }
-function renderLog() {
-  const el = $("logBody");
-  if (!el) return;
-  if (logEntries.length === 0) { el.textContent = "Sin datos aún…"; return; }
-  el.textContent = [...logEntries].reverse().slice(0, 50)
-    .map(e => {
-      const isAcople = e.peakHz > FLUTE_HI && e.peakDb > e.fluteDb + 8;
-      const flag = isAcople ? "  ⚡ACOPLE" : "";
-      return `${e.ts}  global:${fmtHz(e.peakHz)}Hz ${e.peakDb}dB  flauta:${fmtHz(e.fluteHz)}Hz ${e.fluteDb}dB${flag}`;
-    })
-    .join("\n");
+function renderLog(){
+  const el=$("logBody");if(!el)return;
+  if(!logEnabled){el.textContent=T.logDisabled;return;}
+  if(logEntries.length===0){el.textContent=T.noData;return;}
+  el.textContent=[...logEntries].reverse().slice(0,60).map(e=>{
+    const flag=e.peakHz>FLUTE_HI&&e.peakDb>e.fluteDb+8?"  ⚡":"";
+    return`${e.ts}  ${fmtHz(e.peakHz)}Hz ${e.peakDb}dB  flauta:${fmtHz(e.fluteHz)}Hz ${e.fluteDb}dB${flag}`;
+  }).join("\n");
 }
-function startLog() { stopLog(); logInterval = setInterval(sampleLog, 2000); }
-function stopLog()  { if (logInterval) { clearInterval(logInterval); logInterval = null; } }
+function startLog(){stopLog();logInterval=setInterval(sampleLog,2000);}
+function stopLog(){if(logInterval){clearInterval(logInterval);logInterval=null;}}
 
-$("logPauseBtn").addEventListener("click", () => {
-  logPaused = !logPaused;
-  $("logPauseBtn").textContent = logPaused ? "Reanudar" : "Pausar";
-  $("logPauseBtn").classList.toggle("on", logPaused);
-  if (!logPaused) renderLog();
+logEnableBtn.addEventListener("click",()=>{
+  logEnabled=!logEnabled;
+  logEnableBtn.textContent=logEnabled?"ON":"OFF";
+  logEnableBtn.classList.toggle("on",logEnabled);
+  if(logEnabled&&stream)startLog();else stopLog();
+  renderLog();
 });
-$("logCopyBtn").addEventListener("click", () => {
-  const text = logEntries
-    .map(e => `${e.ts}\t${e.peakHz}Hz\t${e.peakDb}dB\t${e.fluteHz}Hz\t${e.fluteDb}dB`)
-    .join("\n");
-  navigator.clipboard?.writeText(text)
-    .then(() => setStatus("Log copiado al portapapeles"))
-    .catch(() => setStatus("Error copiando log"));
+logPauseBtn.addEventListener("click",()=>{
+  logPaused=!logPaused;
+  logPauseBtn.textContent=logPaused?T.resume:T.pause;
+  logPauseBtn.classList.toggle("on",logPaused);
+  if(!logPaused)renderLog();
 });
-$("logClearBtn").addEventListener("click", () => { logEntries = []; renderLog(); });
+logCopyBtn.addEventListener("click",()=>{
+  navigator.clipboard?.writeText(logEntries.map(e=>`${e.ts}\t${e.peakHz}Hz\t${e.peakDb}dB\t${e.fluteHz}Hz\t${e.fluteDb}dB`).join("\n"))
+    .then(()=>console.info(T.logCopied)).catch(()=>console.warn(T.logCopyErr));
+});
+logClearBtn.addEventListener("click",()=>{logEntries=[];renderLog();});
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-updateLabels();
-setLive(false);
-checkBluetooth();
-
+// ── INIT
+const savedTheme=localStorage.getItem("fe-theme")||"dark";
+applyTheme(savedTheme);
+applyI18n();updateLabels();setLive(false);renderLog();
 })();
 </script>
 </body>
